@@ -25,17 +25,17 @@ RWLock::~RWLock() {
 }
 
 void RWLock :: rlock() {
+    pthread_mutex_lock(&this->cant_lectores_m);
     pthread_mutex_lock(&this->cant_escritores_m);
 
     while (this->cant_escritores > 0) {
         pthread_cond_wait(&this->hay_escritor_c, &this->cant_escritores_m);
     }
 
-    pthread_mutex_lock(&this->cant_lectores_m);
     this->cant_lectores++;
-    pthread_mutex_unlock(&this->cant_lectores_m);
-
+    
     pthread_mutex_unlock(&this->cant_escritores_m);
+    pthread_mutex_unlock(&this->cant_lectores_m);
 }
 
 void RWLock :: wlock() {
