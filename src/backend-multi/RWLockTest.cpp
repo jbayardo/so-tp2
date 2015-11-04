@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	pthread_exit(NULL);
 
 error:
-	std::cerr << "Chris puto" << std::endl;
+	pthread_mutex_destroy(&pantalla);
     return 0;
 }
 
