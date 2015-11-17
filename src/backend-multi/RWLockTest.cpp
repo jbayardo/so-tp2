@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
 
 error:
 	std::cerr << "Error" << std::endl;
+	pthread_mutex_destroy(&pantalla);
     return 0;
 }
 
