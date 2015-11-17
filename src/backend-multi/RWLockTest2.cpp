@@ -9,39 +9,20 @@ int NUM_READERS;
 int NUM_WRITERS;
 
 void *test_reader(void *parameter) {
-	int numero = *((int *)parameter);
-
 	while (1) {
 		l_variable.rlock();
-		int local(variable);
-		l_variable.runlock();
-
-		pthread_mutex_lock(&pantalla);
-		std::cout << "[R" << numero << "] Variable: " << local << std::endl;
-		pthread_mutex_unlock(&pantalla);
-
 		if (variable == NUM_WRITERS) {
 			break;
-		}
-
-		usleep(4);
+		}		
+		l_variable.runlock();
 	}
-
 	pthread_exit(NULL);
 }
 
 void *test_writer(void *parameter) {
-	int numero = *((int *)parameter);
-
 	l_variable.wlock();
-	int local(variable);
 	++variable;
 	l_variable.wunlock();
-
-	pthread_mutex_lock(&pantalla);
-	std::cout << "[W" << numero << "] Valor antiguo: " << local << " " << local + 1 << std::endl;
-	pthread_mutex_unlock(&pantalla);
-
 	pthread_exit(NULL);
 }
 

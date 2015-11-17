@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -g -Wall -Werror -fno-stack-protector
 LDFLAGS = -pthread
 
-BINARIES = backend rwlocktest
+BINARIES = backend rwlocktest rwlocktest2
 
 all: $(BINARIES)
 
@@ -17,6 +17,9 @@ RWLock.o: RWLock.cpp RWLock.h
 
 rwlocktest: RWLockTest.cpp RWLock.cpp RWLock.h
 	$(CC) $(LDFLAGS) $(CFLAGS) RWLock.cpp RWLockTest.cpp -o rwlocktest
+
+rwlocktest2: RWLockTest2.cpp RWLock.cpp RWLock.h
+	$(CC) $(LDFLAGS) $(CFLAGS) RWLock.cpp RWLockTest2.cpp -o rwlocktest2
 
 clean:
 	rm -f *.o

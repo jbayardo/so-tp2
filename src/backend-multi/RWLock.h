@@ -12,14 +12,12 @@ class RWLock {
         void wunlock();
         virtual ~RWLock();
     private:
-        std::size_t cant_lectores;
-        std::size_t cant_escritores;
-        
-        pthread_mutex_t cant_escritores_m;
-        pthread_cond_t hay_escritor_c;
+        std::size_t lectores;
+        std::size_t escritores;
+        std::size_t escribiendo;
 
-        pthread_mutex_t cant_lectores_m;
-        pthread_cond_t hay_lectores_c;
+        pthread_mutex_t mutex;
+        pthread_cond_t turno;
 };
 
 #endif

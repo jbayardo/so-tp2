@@ -8,70 +8,57 @@ a la vez. Una vez que su adaptación esté andando DEBEN hacer su propia
 implementación de Read-Write Locks utilizando únicamente Variables de
 Condición. */
 
-RWLock :: RWLock() : cant_lectores(0), cant_escritores(0) {
-    pthread_mutex_init(&(this->cant_escritores_m), NULL);
-    pthread_cond_init(&(this->hay_escritor_c), NULL);
-
-    pthread_mutex_init(&(this->cant_lectores_m), NULL);
-    pthread_cond_init(&(this->hay_lectores_c), NULL);
+RWLock :: RWLock(){
+    pthread_mutex_init(&(this->mutex), NULL);
+    pthread_cond_init(&(this->turno), NULL);
+    lectores = 0;
+    escritores = 0;
+    escribiendo = 0;
 }
 
 RWLock::~RWLock() {
-    pthread_cond_destroy(&(this->hay_escritor_c));
-    pthread_mutex_destroy(&(this->cant_escritores_m));
-
-    pthread_cond_destroy(&(this->hay_lectores_c));
-    pthread_mutex_destroy(&(this->cant_lectores_m));
+    pthread_cond_destroy(&(this->turno));
+    pthread_mutex_destroy(&(this->mutex));
 }
 
 void RWLock :: rlock() {
-    pthread_mutex_lock(&this->cant_lectores_m);
-    pthread_mutex_lock(&this->cant_escritores_m);
+    pthread_mutex_lock(&mutex);
 
-    while (this->cant_escritores > 0) {
-        pthread_cond_wait(&this->hay_escritor_c, &this->cant_escritores_m);
+    if (escritores) {
+        pthread_cond_wait(&turno, &mutex);
     }
 
-    this->cant_lectores++;
-    
-    pthread_mutex_unlock(&this->cant_escritores_m);
-    pthread_mutex_unlock(&this->cant_lectores_m);
+    while (escribiendo) {
+        pthread_cond_wait(&turno, &mutex);
+    }
+
+    lectores++;
+    pthread_mutex_unlock(&mutex);
 }
 
 void RWLock :: wlock() {
-    pthread_mutex_lock(&this->cant_lectores_m);
+    pthread_mutex_lock(&mutex);
+    escritores++;
 
-    while (this->cant_lectores > 0) {
-        pthread_cond_wait(&this->hay_lectores_c, &this->cant_lectores_m);
+    while (lectores || escribiendo) {
+        pthread_cond_wait(&turno, &mutex);
     }
 
-    pthread_mutex_lock(&this->cant_escritores_m);
-
-    while (this->cant_escritores > 0) {
-        pthread_cond_wait(&this->hay_escritor_c, &this->cant_escritores_m);
-    }
-
-    this->cant_escritores++;
-
-    pthread_mutex_unlock(&this->cant_escritores_m);
-    pthread_mutex_unlock(&this->cant_lectores_m);
+    escribiendo++;
+    pthread_mutex_unlock(&mutex);
 }
 
 void RWLock :: runlock() {
-    pthread_mutex_lock(&this->cant_lectores_m);
-    this->cant_lectores--;
-
-    if (this->cant_lectores == 0) {
-        pthread_cond_signal(&this->hay_lectores_c);
-    }
-
-    pthread_mutex_unlock(&this->cant_lectores_m);
+    pthread_mutex_lock(&mutex);
+    lectores--;
+    pthread_cond_broadcast(&turno);
+    pthread_mutex_unlock(&mutex);
 }
 
 void RWLock :: wunlock() {
-    pthread_mutex_lock(&this->cant_escritores_m);
-    this->cant_escritores--;
-
-    pthread_cond_broadcast(&this->hay_escritor_c);
-    pthread_mutex_unlock(&this->cant_escritores_m);
+    pthread_mutex_lock(&mutex);
+    escritores--;
+    escribiendo--;
+    pthread_cond_broadcast(&turno);
+    pthread_mutex_unlock(&mutex);
 }
