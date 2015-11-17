@@ -1,5 +1,7 @@
 #include "RWLock.h"
 #include <pthread.h>
+#include <unistd.h>
+#include <cstdlib>
 #include <vector>
 
 RWLock l_variable;
